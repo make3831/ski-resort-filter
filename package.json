@@ -1,6 +1,7 @@
 {
   "name": "ski-resort-filter",
   "version": "1.0.0",
+  "homepage": "./",
   "main": "index.js",
   "scripts": {
     "start": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
