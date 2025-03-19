@@ -1,153 +1,197 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const SkiResortFilter = () => {
   const [filters, setFilters] = useState({
     lifts: "Any",
     trails: "Any",
     terrainParks: "Any",
-    terrainType: "beginner", // Terrain selection inside filters
+    terrainType: "beginner",
   });
 
-  const [resorts, setResorts] = useState([]); // Store resorts from API
-  const [filteredResorts, setFilteredResorts] = useState([]); // Store filtered results
-  const [loading, setLoading] = useState(true); // Track loading state
+  const [resorts, setResorts] = useState([]);
+  const [filteredResorts, setFilteredResorts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load ski resorts from Flask API
   useEffect(() => {
-    fetch("http://localhost:5000/api/resorts") // Fetch from backend
+    fetch("https://api.theperfectmountain.com/api/resorts")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched Resort Data:", data); // Debugging output
-
+        // Convert API data into proper format
         const formattedResorts = data.map((resort) => ({
-          name: resort.name, // Extract from "name" field
-          lifts: parseInt(resort["Total Lifts"]) || 0,
-          trails: parseInt(resort["Total Runs"]) || 0,
-          terrainParks: parseInt(resort["Terrain Parks"]) || 0,
-          beginner: parseFloat(resort["Beginner Terrain"].replace("%", "")) || 0,
-          intermediate: parseFloat(resort["Intermediate Terrain"].replace("%", "")) || 0,
-          advanced_expert: parseFloat(resort["Advanced/Expert Terrain"].replace("%", "")) || 0,
-          skiableTerrain: resort["Skiable Terrain"],  // ✅ Ensure this field is retrieved
-          baseElevation: resort["Base Elevation"],    // ✅ Ensure this field is retrieved
-          highestElevation: resort["Highest Elevation"],  // ✅ Ensure this field is retrieved
-          averageSnowfall: resort["Average Snowfall"],  // ✅ Ensure this field is retrieved
-          mostDifficultTerrain: resort["Most Difficult Terrain"],  // ✅ Ensure this field is retrieved
-        }));        
+          name: resort.name,
+          lifts: resort["Total Lifts"] || "N/A",
+          trails: resort["Total Runs"] || "N/A",
+          terrainParks: resort["Terrain Parks"] || "N/A",
+          beginner: resort["Beginner Terrain"] || "N/A",
+          intermediate: resort["Intermediate Terrain"] || "N/A",
+          advanced_expert: resort["Advanced/Expert Terrain"] || "N/A",
+          skiableTerrain: resort["Skiable Terrain"] || "N/A",
+          baseElevation: resort["Base Elevation"] || "N/A",
+          highestElevation: resort["Highest Elevation"] || "N/A",
+          averageSnowfall: resort["Average Snowfall"] || "N/A",
+          mostDifficultTerrain: resort["Most Difficult Terrain"] || "N/A",
+        }));
 
         setResorts(formattedResorts);
         setLoading(false);
       })
-      .catch((error) => {
-        console.error("Error loading ski resorts:", error);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
-  // Handle user filter input
   const handleChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  // Filter resorts based on user selection
-  const filterResorts = () => {
-    if (!resorts.length) return [];
-
-    return resorts
-      .filter((resort) => {
-        return (
-          (filters.lifts === "Any" || resort.lifts >= Number(filters.lifts)) &&
-          (filters.trails === "Any" || resort.trails >= Number(filters.trails)) &&
-          (filters.terrainParks === "Any" || resort.terrainParks >= Number(filters.terrainParks))
-        );
-      })
-      .sort((a, b) => (b[filters.terrainType] || 0) - (a[filters.terrainType] || 0));
-  };
-
-  // Find resorts when button is clicked
   const handleFindResorts = () => {
-    setFilteredResorts(filterResorts());
+    setFilteredResorts(resorts);
   };
 
   return (
-    <div style={{ textAlign: "center", fontFamily: "Arial, sans-serif", marginTop: "20px" }}>
-      <h1>
-        <span role="img" aria-label="ski">🎿</span> Ski Resort Finder
-      </h1>
-      <h2>
-        <span role="img" aria-label="skier">⛷️</span> Filter Ski Resorts
-      </h2>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        width: "100%",
+        backgroundImage: "url('https://silvertonmountain.com/wp-content/uploads/2023/12/AB-shot-of-Sven-2014.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Centered Content Box */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          background: "rgba(255, 255, 255, 0.9)",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+          maxWidth: "700px",
+          width: "90%",
+        }}
+      >
+        <h1>
+	  <span role="img" aria-label="ski">🎿</span> Ski Resort Finder
+	</h1>
 
-      <label>Lifts: </label>
-      <select name="lifts" value={filters.lifts} onChange={handleChange}>
-        <option value="Any">Any</option>
-        <option value="5">5+</option>
-        <option value="10">10+</option>
-        <option value="20">20+</option>
-      </select>
+        {/* Filter Inputs */}
+        <div style={{ width: "100%" }}>
+          <label>Lifts: </label>
+          <select name="lifts" value={filters.lifts} onChange={handleChange} style={{ width: "100%", padding: "10px", marginBottom: "10px" }}>
+            <option value="Any">Any</option>
+            <option value="5">5+</option>
+            <option value="10">10+</option>
+            <option value="20">20+</option>
+          </select>
 
-      <label> Trails: </label>
-      <select name="trails" value={filters.trails} onChange={handleChange}>
-        <option value="Any">Any</option>
-        <option value="50">50+</option>
-        <option value="100">100+</option>
-        <option value="150">150+</option>
-      </select>
+          <label> Trails: </label>
+          <select name="trails" value={filters.trails} onChange={handleChange} style={{ width: "100%", padding: "10px", marginBottom: "10px" }}>
+            <option value="Any">Any</option>
+            <option value="50">50+</option>
+            <option value="100">100+</option>
+            <option value="150">150+</option>
+          </select>
 
-      <label> Terrain Parks: </label>
-      <select name="terrainParks" value={filters.terrainParks} onChange={handleChange}>
-        <option value="Any">Any</option>
-        <option value="1">1+</option>
-        <option value="3">3+</option>
-        <option value="5">5+</option>
-      </select>
+          <label> Terrain Parks: </label>
+          <select name="terrainParks" value={filters.terrainParks} onChange={handleChange} style={{ width: "100%", padding: "10px", marginBottom: "10px" }}>
+            <option value="Any">Any</option>
+            <option value="1">1+</option>
+            <option value="3">3+</option>
+            <option value="5">5+</option>
+          </select>
 
-      <label> Select Terrain Type: </label>
-      <select name="terrainType" value={filters.terrainType} onChange={handleChange}>
-        <option value="beginner">Beginner</option>
-        <option value="intermediate">Intermediate</option>
-        <option value="advanced_expert">Advanced/Expert</option>
-      </select>
+          <label> Select Terrain Type: </label>
+          <select name="terrainType" value={filters.terrainType} onChange={handleChange} style={{ width: "100%", padding: "10px", marginBottom: "10px" }}>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced_expert">Advanced/Expert</option>
+          </select>
+        </div>
 
-      <br />
-      <button onClick={handleFindResorts} style={{ marginTop: "10px", padding: "10px", fontSize: "16px" }}>
-        Find Resorts
-      </button>
+        {/* Find Resorts Button */}
+        <button
+          onClick={handleFindResorts}
+          style={{
+            display: "block",
+            margin: "10px auto",
+            padding: "10px 20px",
+            fontSize: "18px",
+            background: "#fff",
+            borderRadius: "5px",
+            boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.2)",
+            transition: "0.3s",
+          }}
+        >
+          Find Resorts
+        </button>
 
-      <h2>
-        <span role="img" aria-label="mountain">🏔️</span> Best Ski Resorts for Selected Terrain
-      </h2>
-      {loading ? (
-        <p>Loading ski resorts...</p>
-      ) : filteredResorts.length > 0 ? (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {filteredResorts.map((resort) => (
-            <li key={resort.name} style={{ fontSize: "18px", marginBottom: "15px" }}>
-              <strong>{resort.name}</strong>
-              <br />
-              Lifts: {resort.lifts}, Trails: {resort.trails}, Terrain Parks: {resort.terrainParks}
-              <br />
-              Beginner Terrain: {resort.beginner}%
-              <br />
-              Intermediate Terrain: {resort.intermediate}%
-              <br />
-              Advanced/Expert Terrain: {resort.advanced_expert}%
-              <br />
-              Skiable Terrain: {resort.skiableTerrain}
-              <br />
-              Base Elevation: {resort.baseElevation}
-              <br />
-              Highest Elevation: {resort.highestElevation}
-              <br />
-              Average Snowfall: {resort.averageSnowfall}
-              <br />
-              Most Difficult Terrain: {resort.mostDifficultTerrain}
-            </li>
-          ))}
-        </ul>
+        {/* Resort Results */}
+        <h2>
+	  <span role="img" aria-label="mountain">🏔️ </span> Best Ski Resorts for Selected Terrain
+	</h2>
+        {loading ? (
+          <p>Loading ski resorts...</p>
+        ) : filteredResorts.length > 0 ? (
+          <ul style={{ listStyle: "none", padding: 0, textAlign: "left", width: "100%" }}>
+            {filteredResorts.map((resort) => (
+              <li
+                key={resort.name}
+                style={{
+                  background: "#f8f8f8",
+                  padding: "15px",
+                  borderRadius: "8px",
+                  marginBottom: "10px",
+                  boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <strong>{resort.name}</strong>
+                <br />
+                Lifts: {resort.lifts}, Trails: {resort.trails}, Terrain Parks: {resort.terrainParks}
+                <br />
+                Beginner Terrain: {resort.beginner}%
+                <br />
+                Intermediate Terrain: {resort.intermediate}%
+                <br />
+                Advanced/Expert Terrain: {resort.advanced_expert}%
+                <br />
+                Skiable Terrain: {resort.skiableTerrain}
+                <br />
+                Base Elevation: {resort.baseElevation} ft
+                <br />
+                Highest Elevation: {resort.highestElevation} ft
+                <br />
+                Average Snowfall: {resort.averageSnowfall} inches
+                <br />
+                Most Difficult Terrain: {resort.mostDifficultTerrain}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No resorts match your filters. Try adjusting them.</p>
+        )}
 
-      ) : (
-        <p>No resorts match your filters. Try adjusting them.</p>
-      )}
+        {/* Back Button */}
+        <Link to="/">
+          <button
+            style={{
+              display: "block",
+              margin: "10px auto",
+              padding: "10px 20px",
+              background: "#007bff",
+              color: "white",
+              borderRadius: "5px",
+              boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            ⬅ Back to Home
+          </button>
+        </Link>
+      </div>
     </div>
   );
 };

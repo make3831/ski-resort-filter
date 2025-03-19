@@ -166,17 +166,21 @@ def filter_resorts():
 
     return jsonify(filtered_resorts)
 
-# **API Route for React Frontend - Traffic Data**
-@app.route("/api/getDistances", methods=["GET"])
+# **API Route for React Frontend - TrafficData**
+@app.route('/api/getDistances', methods=['GET'])
 def get_distances():
-    user_lat = request.args.get("lat")
-    user_lon = request.args.get("lon")
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
 
-    if not user_lat or not user_lon:
+    if not lat or not lon:
         return jsonify({"error": "Missing latitude or longitude"}), 400
 
-    distances = get_traffic_data(user_lat, user_lon)
-    return jsonify(distances)
+    return jsonify({
+        "lat": float(lat),
+        "lon": float(lon),
+        "message": "Success!"
+    })
+
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)  # Run backend on port 5000
+    app.run(host="0.0.0.0", port=5000, debug=True)  # Run backend on port 5000
